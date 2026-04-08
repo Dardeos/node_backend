@@ -1,8 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const { Event, Participant } = require('./models');
+const jwt = require('jsonwebtoken');
+const { Event, Participant, User } = require('./models');
 
-// Events
+
+// AUTHENTIFICATION
+router.post('/token', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        const user = await User.findOne({ where: { username } });
+        if (!user) {
+            return res.status(401).json({ detail: "Utilisateur introuvable." });
+        }
+
+        // Vérification directe sans cryptage !
+        if (password !== user.password) {
+            return res.status(401).json({ detail: "Mot de passe incorrect." });
+        }
+
+        // On renvoie un token valide (le front l'attend dans "access")
+        const token = jwt.sign({ userId: user.id, username: user.username }, 'super_secret', { expiresIn: '24h' });
+        res.json({ access: token }); 
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// EVENTS
 router.get('/events', async (req, res) => {
     try {
         const events = await Event.findAll();
@@ -43,7 +70,8 @@ router.delete('/events/:id', async (req, res) => {
     }
 });
 
-// Participants
+
+// PARTICIPANTS
 router.get('/participants', async (req, res) => {
     try {
         const participants = await Participant.findAll();
