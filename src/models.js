@@ -7,7 +7,7 @@ const sequelize = process.env.DATABASE_URL
         dialectOptions: {
             ssl: {
                 require: true,
-                rejectUnauthorized: false // Required for Render/ElephantSQL
+                rejectUnauthorized: false 
             }
         }
     })
