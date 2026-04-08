@@ -1,39 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const { Event, Participant, User } = require('./models');
+const { Event, Participant } = require('./models');
 
-
-// AUTHENTIFICATION
-router.post('/token', async (req, res) => {
+// STATS
+router.get('/stats', async (req, res) => {
     try {
-        const { username, password } = req.body;
-
-        const user = await User.findOne({ where: { username } });
-        if (!user) {
-            return res.status(401).json({ detail: "Utilisateur introuvable." });
-        }
-
-        // Vérification directe sans cryptage !
-        if (password !== user.password) {
-            return res.status(401).json({ detail: "Mot de passe incorrect." });
-        }
-
-        // On renvoie un token valide (le front l'attend dans "access")
-        const token = jwt.sign({ userId: user.id, username: user.username }, 'super_secret', { expiresIn: '24h' });
-        res.json({ access: token }); 
-
+        const total    = await Event.count();
+        const upcoming = await Event.count({ where: { status: 'upcoming' } });
+        const ongoing  = await Event.count({ where: { status: 'ongoing' } });
+        const finished = await Event.count({ where: { status: 'finished' } });
+        res.json({ total, upcoming, ongoing, finished });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-
 // EVENTS
 router.get('/events', async (req, res) => {
     try {
-        const events = await Event.findAll();
-        res.json(events);
+        res.json(await Event.findAll());
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -41,8 +26,7 @@ router.get('/events', async (req, res) => {
 
 router.post('/events', async (req, res) => {
     try {
-        const event = await Event.create(req.body);
-        res.status(201).json(event);
+        res.status(201).json(await Event.create(req.body));
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -52,8 +36,7 @@ router.put('/events/:id', async (req, res) => {
     try {
         const event = await Event.findByPk(req.params.id);
         if (!event) return res.status(404).json({ error: 'Event not found' });
-        await event.update(req.body);
-        res.json(event);
+        res.json(await event.update(req.body));
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -70,12 +53,10 @@ router.delete('/events/:id', async (req, res) => {
     }
 });
 
-
 // PARTICIPANTS
 router.get('/participants', async (req, res) => {
     try {
-        const participants = await Participant.findAll();
-        res.json(participants);
+        res.json(await Participant.findAll());
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -83,8 +64,7 @@ router.get('/participants', async (req, res) => {
 
 router.post('/participants', async (req, res) => {
     try {
-        const participant = await Participant.create(req.body);
-        res.status(201).json(participant);
+        res.status(201).json(await Participant.create(req.body));
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
