@@ -30,12 +30,37 @@ const Participant = sequelize.define('Participant', {
 });
 
 
+// --- CORRECTION DU MODÈLE REGISTRATION ---
 const Registration = sequelize.define('Registration', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
+    id: { 
+        type: DataTypes.INTEGER, 
+        primaryKey: true, 
+        autoIncrement: true 
+    },
+    // On définit explicitement les clés étrangères pour correspondre à Django
+    event_id: {
+        type: DataTypes.INTEGER,
+        references: { model: 'api_event', key: 'id' }
+    },
+    participant_id: {
+        type: DataTypes.INTEGER,
+        references: { model: 'api_participant', key: 'id' }
+    }
+}, {
+    tableName: 'api_registration', // Nom exact de la table pivot Django
+    timestamps: false
 });
 
-
-Event.belongsToMany(Participant, { through: Registration });
-Participant.belongsToMany(Event, { through: Registration });
+// --- LIAISONS CORRIGÉES ---
+Event.belongsToMany(Participant, { 
+    through: Registration, 
+    foreignKey: 'event_id', 
+    otherKey: 'participant_id' 
+});
+Participant.belongsToMany(Event, { 
+    through: Registration, 
+    foreignKey: 'participant_id', 
+    otherKey: 'event_id' 
+});
 
 module.exports = { sequelize, Event, Participant, Registration };
