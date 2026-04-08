@@ -15,7 +15,11 @@ const Event = sequelize.define('Event', {
     // On met allowNull: true pour la description au cas où Django l'accepte vide
     description: { type: DataTypes.TEXT, allowNull: true }, 
     date:        { type: DataTypes.DATE, allowNull: false },
-    status:      { type: DataTypes.STRING, defaultValue: 'upcoming' }
+    status:      { type: DataTypes.STRING, defaultValue: 'upcoming' },
+    created_at: { 
+        type: DataTypes.DATE, 
+        defaultValue: Sequelize.NOW 
+    }
 }, {
     tableName: 'api_event', // Assure-toi que c'est bien api_event
     timestamps: false       // Django n'a pas createdAt/updatedAt
