@@ -14,15 +14,11 @@ const Event = sequelize.define('Event', {
     title:       { type: DataTypes.STRING, allowNull: false },
     description: DataTypes.TEXT,
     date:        { type: DataTypes.DATE, allowNull: false },
-    status:      { type: DataTypes.ENUM('upcoming', 'ongoing', 'finished'), defaultValue: 'upcoming' }
+    // Attention : Dans Django, les choix sont souvent des strings simples, pas des ENUM
+    status:      { type: DataTypes.STRING, defaultValue: 'upcoming' } 
 }, {
-    // 1. On force le nom de la table pour correspondre à Django
-    tableName: 'api_event', 
-    // 2. On force le snake_case pour les timestamps automatiques
-    underscored: true,      
-    // 3. On s'assure que les noms correspondent exactement
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    tableName: 'api_event', // <--- TRÈS IMPORTANT : Le nom exact dans ta DB Render
+    timestamps: false       // Django n'utilise pas le format timestamps de Sequelize
 });
 
 const Participant = sequelize.define('Participant', {
