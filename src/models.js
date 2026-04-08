@@ -12,13 +12,13 @@ const sequelize = process.env.DATABASE_URL
 
 const Event = sequelize.define('Event', {
     title:       { type: DataTypes.STRING, allowNull: false },
-    description: DataTypes.TEXT,
+    // On met allowNull: true pour la description au cas où Django l'accepte vide
+    description: { type: DataTypes.TEXT, allowNull: true }, 
     date:        { type: DataTypes.DATE, allowNull: false },
-    // Attention : Dans Django, les choix sont souvent des strings simples, pas des ENUM
-    status:      { type: DataTypes.STRING, defaultValue: 'upcoming' } 
+    status:      { type: DataTypes.STRING, defaultValue: 'upcoming' }
 }, {
-    tableName: 'api_event', // <--- TRÈS IMPORTANT : Le nom exact dans ta DB Render
-    timestamps: false       // Django n'utilise pas le format timestamps de Sequelize
+    tableName: 'api_event', // Assure-toi que c'est bien api_event
+    timestamps: false       // Django n'a pas createdAt/updatedAt
 });
 
 const Participant = sequelize.define('Participant', {
