@@ -18,7 +18,15 @@ router.get('/stats', async (req, res) => {
 // EVENTS
 router.get('/events', async (req, res) => {
     try {
-        res.json(await Event.findAll());
+        const { status } = req.query; // ex: /api/events?status=upcoming
+        const whereClause = {};
+        
+        if (status) {
+            whereClause.status = status;
+        }
+
+        const events = await Event.findAll({ where: whereClause });
+        res.json(events);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -53,6 +61,29 @@ router.delete('/events/:id', async (req, res) => {
     }
 });
 
+// UPDATE Participant
+router.put('/participants/:id', async (req, res) => {
+    try {
+        const p = await Participant.findByPk(req.params.id);
+        if (!p) return res.status(404).json({ error: 'Participant not found' });
+        res.json(await p.update(req.body));
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// DELETE Participant
+router.delete('/participants/:id', async (req, res) => {
+    try {
+        const p = await Participant.findByPk(req.params.id);
+        if (!p) return res.status(404).json({ error: 'Participant not found' });
+        await p.destroy();
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // PARTICIPANTS
 router.get('/participants', async (req, res) => {
     try {
@@ -65,6 +96,24 @@ router.get('/participants', async (req, res) => {
 router.post('/participants', async (req, res) => {
     try {
         res.status(201).json(await Participant.create(req.body));
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+router.post('/register', async (req, res) => {
+    try {
+        const { eventId, participantId } = req.body;
+        const event = await Event.findByPk(eventId);
+        const participant = await Participant.findByPk(participantId);
+
+        if (!event || !participant) {
+            return res.status(404).json({ error: "Event or Participant not found" });
+        }
+
+        // Sequelize crée magiquement cette méthode grâce au belongsToMany
+        await event.addParticipant(participant);
+        res.json({ message: "Inscription réussie" });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }

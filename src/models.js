@@ -20,4 +20,13 @@ const Participant = sequelize.define('Participant', {
     email: { type: DataTypes.STRING, unique: true, allowNull: false }
 });
 
-module.exports = { sequelize, Event, Participant };
+
+const Registration = sequelize.define('Registration', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
+});
+
+
+Event.belongsToMany(Participant, { through: Registration });
+Participant.belongsToMany(Event, { through: Registration });
+
+module.exports = { sequelize, Event, Participant, Registration };
