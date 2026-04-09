@@ -13,7 +13,6 @@ app.use('/api', routes);
 
 const PORT = process.env.PORT || 5000;
 
-// Remplace sequelize.sync() par sequelize.authenticate()
 sequelize.authenticate().then(() => {
     console.log("Connexion à la base de données Django.");
     app.listen(PORT, () => console.log(`Node.js running on port ${PORT}`));

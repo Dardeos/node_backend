@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { Event, Participant } = require('./models');
 
-// STATS
 router.get('/stats', async (req, res) => {
     try {
         const total    = await Event.count();
@@ -15,10 +14,9 @@ router.get('/stats', async (req, res) => {
     }
 });
 
-// EVENTS
 router.get('/events', async (req, res) => {
     try {
-        const { status } = req.query; // ex: /api/events?status=upcoming
+        const { status } = req.query; 
         const whereClause = {};
         
         if (status) {
@@ -61,7 +59,6 @@ router.delete('/events/:id', async (req, res) => {
     }
 });
 
-// UPDATE Participant
 router.put('/participants/:id', async (req, res) => {
     try {
         const p = await Participant.findByPk(req.params.id);
@@ -72,7 +69,6 @@ router.put('/participants/:id', async (req, res) => {
     }
 });
 
-// DELETE Participant
 router.delete('/participants/:id', async (req, res) => {
     try {
         const p = await Participant.findByPk(req.params.id);
@@ -84,7 +80,6 @@ router.delete('/participants/:id', async (req, res) => {
     }
 });
 
-// PARTICIPANTS
 router.get('/participants', async (req, res) => {
     try {
         res.json(await Participant.findAll());
@@ -111,7 +106,6 @@ router.post('/register', async (req, res) => {
             return res.status(404).json({ error: "Event or Participant not found" });
         }
 
-        // Sequelize crée magiquement cette méthode grâce au belongsToMany
         await event.addParticipant(participant);
         res.json({ message: "Inscription réussie" });
     } catch (err) {

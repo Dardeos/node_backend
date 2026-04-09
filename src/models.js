@@ -8,11 +8,8 @@ const sequelize = process.env.DATABASE_URL
     })
     : new Sequelize({ dialect: 'sqlite', storage: './db.sqlite3' });
 
-// models.js
-
 const Event = sequelize.define('Event', {
     title:       { type: DataTypes.STRING, allowNull: false },
-    // On met allowNull: true pour la description au cas où Django l'accepte vide
     description: { type: DataTypes.TEXT, allowNull: true }, 
     date:        { type: DataTypes.DATE, allowNull: false },
     status:      { type: DataTypes.STRING, defaultValue: 'upcoming' },
@@ -21,27 +18,25 @@ const Event = sequelize.define('Event', {
         defaultValue: Sequelize.NOW 
     }
 }, {
-    tableName: 'api_event', // Assure-toi que c'est bien api_event
-    timestamps: false       // Django n'a pas createdAt/updatedAt
+    tableName: 'api_event', 
+    timestamps: false      
 });
 
 const Participant = sequelize.define('Participant', {
     name:  { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, unique: true, allowNull: false }
 }, {
-    tableName: 'api_participant', // <--- TRÈS IMPORTANT
+    tableName: 'api_participant',
     timestamps: false
 });
 
 
-// --- CORRECTION DU MODÈLE REGISTRATION ---
 const Registration = sequelize.define('Registration', {
     id: { 
         type: DataTypes.INTEGER, 
         primaryKey: true, 
         autoIncrement: true 
     },
-    // On définit explicitement les clés étrangères pour correspondre à Django
     event_id: {
         type: DataTypes.INTEGER,
         references: { model: 'api_event', key: 'id' }
@@ -51,11 +46,10 @@ const Registration = sequelize.define('Registration', {
         references: { model: 'api_participant', key: 'id' }
     }
 }, {
-    tableName: 'api_registration', // Nom exact de la table pivot Django
+    tableName: 'api_registration',
     timestamps: false
 });
 
-// --- LIAISONS CORRIGÉES ---
 Event.belongsToMany(Participant, { 
     through: Registration, 
     foreignKey: 'event_id', 
